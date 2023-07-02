@@ -56,7 +56,6 @@ const App: FC = () => {
 		<div className='App'>
 			<BalanceContext.Provider value={balance}>
 				{error ? <div>{error}</div> : <IndicatorForm />}
-				<IndicatorForm />
 			</BalanceContext.Provider>
 		</div>
 	)
