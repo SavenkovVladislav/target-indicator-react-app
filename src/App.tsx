@@ -1,15 +1,18 @@
 import React, { FC, useState, useEffect } from 'react'
 import axios from 'axios'
-import Indicator from './components/Indicator'
+import IndicatorForm from './components/IndicatorForm'
 
 import BalanceType from './types/BalanceType'
 
-import './App.css'
+import './App.scss'
 
 const initialBalance = { balance_usd: 0 }
 
+export const BalanceContext = React.createContext(initialBalance)
+
 const App: FC = () => {
 	const [balance, setBalance] = useState<BalanceType>(initialBalance)
+	const [error, setError] = useState<string | null>(null)
 
 	const fetchData = async () => {
 		try {
@@ -17,8 +20,17 @@ const App: FC = () => {
 				'https://alex.devel.softservice.org/testapi/'
 			)
 			setBalance(response.data)
-		} catch (error) {
-			console.error(error)
+		} catch (error: any) {
+			if (error.response) {
+				// Ошибка с ответом от сервера
+				setError(error.response.data.message)
+			} else if (error.request) {
+				// Ошибка без ответа от сервера
+				setError('Ошибка соединения с сервером')
+			} else {
+				// Общая ошибка
+				setError(error.message)
+			}
 		}
 	}
 
@@ -40,11 +52,12 @@ const App: FC = () => {
 		}
 	}, [balance])
 
-	console.log(balance)
-
 	return (
 		<div className='App'>
-			<Indicator balanceUsd={balance.balance_usd} />
+			<BalanceContext.Provider value={balance}>
+				{error ? <div>{error}</div> : <IndicatorForm />}
+				<IndicatorForm />
+			</BalanceContext.Provider>
 		</div>
 	)
 }
